@@ -1,0 +1,454 @@
+{
+  "name": "AI Automation 2",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1paqGGsf_txhv3reS_oXc8ldS_AwsJVoJku0U9YdBfd4",
+          "mode": "list",
+          "cachedResultName": "Potential_Custmores",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1paqGGsf_txhv3reS_oXc8ldS_AwsJVoJku0U9YdBfd4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1paqGGsf_txhv3reS_oXc8ldS_AwsJVoJku0U9YdBfd4/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "a20d850c-f54b-48e5-b865-07c1dab82799",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "mhjFlfrLFn6Pqy6y",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.genderize.io/",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $json.Name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "ef2eabba-3ab3-43c5-8685-f07681ed8ef9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "https://api.nationalize.io/",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $json.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        832,
+        0
+      ],
+      "id": "4d72da2d-2eb9-48b0-8f09-9c8fa60ae3ee",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "url": "https://api.agify.io/",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $json.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        624,
+        0
+      ],
+      "id": "412f0a89-4e52-441b-9fe3-6d31a64bf263",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1paqGGsf_txhv3reS_oXc8ldS_AwsJVoJku0U9YdBfd4",
+          "mode": "list",
+          "cachedResultName": "Potential_Custmores",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1paqGGsf_txhv3reS_oXc8ldS_AwsJVoJku0U9YdBfd4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1paqGGsf_txhv3reS_oXc8ldS_AwsJVoJku0U9YdBfd4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Id": "={{ $('Get row(s) in sheet').item.json.Id }}",
+            "Name": "={{ $('Get row(s) in sheet').item.json.Name }}",
+            "Number": "={{ $('Get row(s) in sheet').item.json.Number }}",
+            "Budget": "={{ $('Get row(s) in sheet').item.json.Budget }}",
+            "Gender": "={{ $('HTTP Request').item.json.gender }}",
+            "Nationality": "={{ $json.country[0].country_id }}",
+            "Age": "={{ $('HTTP Request2').item.json.age }}"
+          },
+          "matchingColumns": [
+            "Id"
+          ],
+          "schema": [
+            {
+              "id": "Id",
+              "displayName": "Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Number",
+              "displayName": "Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Gender",
+              "displayName": "Gender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nationality",
+              "displayName": "Nationality",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Age",
+              "displayName": "Age",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "e3defacd-171b-4376-9990-3a9a5387cf2d",
+      "name": "Append or update row in sheet",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "mhjFlfrLFn6Pqy6y",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "sysguardview@gmail.com",
+        "subject": "={{ $json.output[0].content[0].text.body.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.output[0].content[0].text.body.content }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        0
+      ],
+      "id": "76e238a6-8333-4ee0-9725-81b6391abaa4",
+      "name": "Send a message",
+      "webhookId": "314bfad6-2d71-46a4-b077-a5ee23b24a53",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bG8tlCabQHa7wfJQ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1paqGGsf_txhv3reS_oXc8ldS_AwsJVoJku0U9YdBfd4",
+          "mode": "list",
+          "cachedResultName": "Potential_Custmores",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1paqGGsf_txhv3reS_oXc8ldS_AwsJVoJku0U9YdBfd4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1paqGGsf_txhv3reS_oXc8ldS_AwsJVoJku0U9YdBfd4/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "94d7fedd-a1cb-4b93-95eb-275c6dd370b6",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "nReWcAmKJINcjmtQ",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Hey you are a email write, your aim is to provide me with email which I then will be sending on my email ID.\n\nBelow is the format :\n\n\nHey Vansh,\n\nA new client   {{ $json.Name }} has signed up, below are the details.\n\nNumber: \nBudget: {{ $json.Budget }}\n\nBelow is the expected gender, age and nationality.\n\nGender: {{ $json.Gender }}\nAge: {{ $json.Age }}\nNationality: {{ $json.Nationality }}\n\nDo make sure to connect with him at {{ $json.Number }}\n\nThanks,\nYour awesome workflow\n\nPlease make sure that email is a lot in depth with more explanation and suggestion for the sale.\n\nStrictly give output as a json not misssing any key, below is the structure.\n\n{\n\"body\":\n{\n\"subject\":\n}\n}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "2fccdcd9-fcba-4aef-b05f-372e54dad79e",
+      "name": "Message a model",
+      "executeOnce": false,
+      "credentials": {
+        "openAiApi": {
+          "id": "sHi3PkExKa6JMlqe",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Message a model": [
+      {
+        "json": {
+          "output": [
+            {
+              "id": "msg_0c23b2933b9e4b4d00698de4f653448196865448c7abc58807",
+              "type": "message",
+              "status": "completed",
+              "content": [
+                {
+                  "type": "output_text",
+                  "annotations": [],
+                  "logprobs": [],
+                  "text": {
+                    "body": {
+                      "subject": "New Client Signup - Vansh - Action Required",
+                      "content": "Hey Vansh,\n\nI hope this email finds you well. I am excited to inform you that we have a new client named Vansh who has recently signed up with us. This is a fantastic opportunity to expand our business and build a strong professional relationship.\n\nHere are the client details:\n\nNumber: \nBudget: $50,000\n\nThe client has specified the following preferences for our approach:\n\nGender: Male\nAge: 36\nNationality: Indian (IN)\n\nGiven this information, I suggest tailoring our communication and offerings to align with his demographic profile. For example, understanding cultural preferences and professional interests typical for a 36-year-old male from India could help us customize our pitch and services to better suit his expectations.\n\nMoreover, it is crucial to connect with Vansh personally and promptly. Please reach out to him at his contact number 9999555563 at your earliest convenience. A personalized interaction will not only build trust but also provide insights into his specific needs and requirements, which can be instrumental in finalizing the sale.\n\nAdditionally, documenting details from your conversation and any feedback will help us refine our strategies for similar clients in the future.\n\nLet me know if you need any assistance with this outreach or if you want me to prepare any presentations or proposals.\n\nThanks,\nYour awesome workflow"
+                    }
+                  }
+                }
+              ],
+              "role": "assistant"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "23fd4c96-c77c-4623-9726-bd0bc8b6ddc3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2ff9e8f5037bd4f4d6d0e1f8382867748a1bffe12e92470d06395230faf80ca4"
+  },
+  "id": "1vlQkVD-NFbJuozQbMK0B",
+  "tags": []
+}
