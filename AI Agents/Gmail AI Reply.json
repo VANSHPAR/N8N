@@ -1,0 +1,324 @@
+{
+  "name": "Gmail AI Reply",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ea90efcc-cf73-4232-9d1c-5b5cefbaeb67",
+      "name": "Check for New Mail",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "qzucPENki79Go8Wa",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "f9db7b34-addc-4213-9220-fdd18aa543c9",
+      "name": "Get a message",
+      "webhookId": "270ac307-3d32-4ad7-9826-cbf55014cc80",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "qzucPENki79Go8Wa",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a email responding agent.\n\nBelow are the content of latest email i got.\n\nSubject:  {{ $json.Subject }}\n\nBody: {{ $json.snippet }}\n\nYou have to do 2 things,\n1. specify the label based on the email.Use the tools to get all the labels and there Id and mention both of them property.\n\nlabel can be one of below :\nCourse,\nQuestions,\nsponsorship\n\n2. As a smart assistant please draft the response for me so that I can reply to my email. with subject and body\n\nMake sure that reply is very respectable and whatever required please explain student doubt in depth with example and also make sure that reply follow a strict HTML format so it is easy to read.\n\n\n\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "b3194ce1-4ba7-4ee7-bfc7-972017307a14",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        288,
+        208
+      ],
+      "id": "3e50ba07-5c90-46b0-a9dd-01fe0176119a",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "vEu0bLPJbnNMUtc1",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\"label\":\"Question\",\n\"label_id\":\"12345e64\",\n\"subject\":\"doubt_ans\",\n\"reply\":\"Hey Thanks for reaching out\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        208
+      ],
+      "id": "72e65ddb-669e-4800-b93b-b8072308bc72",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Get a message').item.json.id }}",
+        "labelIds": "={{ $json.output.label_id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "130c9af2-9abd-482f-9462-21aa8632faef",
+      "name": "Add label to message",
+      "webhookId": "d8a005c2-44da-434e-82ba-ee68ff4ac8d1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "qzucPENki79Go8Wa",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        544,
+        208
+      ],
+      "id": "517c8b29-fc25-49c0-8e96-46c8ef1be817",
+      "name": "Get many labels in Gmail",
+      "webhookId": "0d8b135e-4867-4e1d-b0e2-21b17aa78673",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "qzucPENki79Go8Wa",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $('AI Agent').item.json.output.subject }}",
+        "emailType": "html",
+        "message": "={{ $('AI Agent').item.json.output.reply }}",
+        "options": {
+          "threadId": "={{ $('Get a message').item.json.threadId }}",
+          "sendTo": "={{ $('Get a message').item.json.From }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "b101f298-f7e4-4913-8185-3c7a9de13c5c",
+      "name": "Create a draft",
+      "webhookId": "ed49970b-6df8-41b3-8b7b-ad50e00a4138",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "qzucPENki79Go8Wa",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Check for New Mail": [
+      {
+        "json": {
+          "id": "19c5a9346740ffc5",
+          "threadId": "19c5a91a2e6c329f",
+          "snippet": "please tell me what is the roadmap for learning AI Agents using n8n",
+          "payload": {
+            "mimeType": "multipart/alternative"
+          },
+          "sizeEstimate": 731,
+          "historyId": "4923",
+          "internalDate": "1771046128000",
+          "labels": [
+            {
+              "id": "SENT",
+              "name": "SENT"
+            },
+            {
+              "id": "INBOX",
+              "name": "INBOX"
+            },
+            {
+              "id": "IMPORTANT",
+              "name": "IMPORTANT"
+            },
+            {
+              "id": "UNREAD",
+              "name": "UNREAD"
+            }
+          ],
+          "Subject": "Questions",
+          "From": "Guard View <sysguardview@gmail.com>",
+          "To": "Guard View <sysguardview@gmail.com>"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "AI Agent": [
+      {
+        "json": {
+          "output": {
+            "label": "Questions",
+            "label_id": "Label_7088307037662396065",
+            "subject": "Re: Questions",
+            "reply": "<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Roadmap for Learning AI Agents using n8n</title>\n  <style>\n    body {font-family: Arial, sans-serif; line-height: 1.6; color:#333;}\n    h1 {color:#2c3e50;}\n    h2 {color:#34495e;}\n    ol {margin-left: 20px;}\n    code {background:#f4f4f4; padding:2px 4px; border-radius:4px;}\n    .example {background:#fafafa; border-left:4px solid #3498db; padding:10px; margin:10px 0;}\n  </style>\n</head>\n<body>\n  <h1>Roadmap for Learning AI Agents with n8n</h1>\n  <p>Dear Student,</p>\n  <p>Thank you for reaching out with your question. Below is a detailed roadmap that will guide you from the fundamentals to building production‑ready AI agents using <strong>n8n</strong>. Each step includes recommended resources and a short example to illustrate the concept.</p>\n\n  <h2>1. Understand the Basics of Automation & Workflows</h2>\n  <ol>\n    <li>Familiarise yourself with n8n’s core concepts: nodes, triggers, and data flow.</li>\n    <li>Complete the official <a href=\"https://docs.n8n.io/getting-started/quickstart/\">n8n Quick‑Start tutorial</a> and build a simple “Hello World” workflow that sends an email.</li>\n  </ol>\n\n  <h2>2. Learn Fundamentals of AI & Machine Learning</h2>\n  <ol>\n    <li>Study basic ML concepts (supervised vs unsupervised, model training, inference).</li>\n    <li>Recommended courses: Andrew Ng’s <em>Machine Learning</em> on Coursera or the free <em>Intro to Machine Learning</em> on Kaggle.</li>\n    <li>Practice with Python libraries (scikit‑learn, pandas) to build a tiny sentiment‑analysis model.</li>\n  </ol>\n\n  <h2>3. Get Comfortable with APIs & Model Hosting</h2>\n  <ol>\n    <li>Learn how to expose a model as a REST API (FastAPI, Flask, or using cloud services like Hugging Face Inference API).</li>\n    <li>Deploy a simple model (e.g., a text‑classification model) to Hugging Face and obtain an endpoint URL.</li>\n  </ol>\n\n  <h2>4. Connect AI Models to n8n</h2>\n  <ol>\n    <li>Use n8n’s <code>HTTP Request</code> node to call the model’s endpoint.</li>\n    <li>Parse the JSON response with the <code>Set</code> or <code>Function</code> node.</li>\n    <li><strong>Example:</strong>\n      <div class=\"example\">\n        <p><strong>Goal:</strong> Build a workflow that receives a Slack message, analyses its sentiment via an AI model, and replies with a friendly note.</p>\n        <ol>\n          <li>Trigger: <code>Slack Trigger</code> – catches new messages.</li>\n          <li>Node: <code>HTTP Request</code> – POST the message text to the Hugging Face endpoint.</li>\n          <li>Node: <code>Function</code> – interpret the sentiment score and create a reply string.</li>\n          <li>Node: <code>Slack Send Message</code> – post the reply back to the channel.</li>\n        </ol>\n      </div>\n    </li>\n  </ol>\n\n  <h2>5. Build More Complex AI Agents</h2>\n  <ol>\n    <li>Combine multiple AI services (e.g., OpenAI’s GPT‑4 for generation, a vector DB for retrieval, and a classification model for routing).</li>\n    <li>Design a state‑ful agent using n8n’s <code>Workflow Execution</code> node to store context in a database (PostgreSQL, Airtable, etc.).</li>\n    <li>Implement error handling and retries with the <code>Error Trigger</code> node.</li>\n  </ol>\n\n  <h2>6. Testing, Monitoring & Scaling</h2>\n  <ol>\n    <li>Write unit tests for your Python model and integration tests for the n8n workflow (use n8n’s <code>Execute Workflow</code> API).</li>\n    <li>Monitor usage with n8n’s built‑in execution logs and set up alerts (e.g., via Email or Discord) for failures.</li>\n    <li>When traffic grows, consider running n8n in Docker/Kubernetes and using a managed AI inference service for low latency.</li>\n  </ol>\n\n  <h2>7. Resources & Community</h2>\n  <ul>\n    <li>n8n Documentation – <a href=\"https://docs.n8n.io/\">https://docs.n8n.io/</a></li>\n    <li>n8n Forum – great place to ask specific workflow questions.</li>\n    <li>OpenAI Cookbook – examples of prompting and API usage.</li>\n    <li>Hugging Face Spaces – explore ready‑made inference APIs.</li>\n  </ul>\n\n  <p>If you need any clarification on a particular step or would like a hands‑on walkthrough of a specific use‑case, please let me know. I’m happy to provide code snippets or a sample n8n workflow export.</p>\n  <p>Best regards,<br/>[Your Name]<br/>AI Learning Assistant</p>\n</body>\n</html>"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Check for New Mail": {
+      "main": [
+        [
+          {
+            "node": "Get a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Add label to message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many labels in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f562e63d-1e33-4eda-9747-fd68dc3a1bdd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2ff9e8f5037bd4f4d6d0e1f8382867748a1bffe12e92470d06395230faf80ca4"
+  },
+  "id": "B31eLG8CXIrgU9wdSomRi",
+  "tags": []
+}
